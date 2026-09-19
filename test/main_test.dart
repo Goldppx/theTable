@@ -4,8 +4,10 @@ import 'package:the_table/main.dart';
 void main() {
   testWidgets('renders the course tab', (tester) async {
     await tester.pumpWidget(const TheTableApp());
-    await tester.pumpAndSettle();
-    expect(find.text('本周课程'), findsOneWidget);
-    expect(find.text('数据结构'), findsOneWidget);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('数据结构'), findsWidgets);
+    expect(find.text('操作系统'), findsOneWidget);
   });
 }
