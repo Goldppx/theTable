@@ -1,0 +1,22 @@
+name: the_table
+description: A clean-room Flutter campus companion.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  dynamic_color: ^1.7.0
+  flutter:
+    sdk: flutter
+  flutter_secure_storage: ^9.2.4
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_lints: ^5.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
