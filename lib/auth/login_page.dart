@@ -37,8 +37,8 @@ class _CampusLoginPageState extends State<CampusLoginPage> {
             _readPortalIdentity(url);
           },
           onWebResourceError: (error) {
-            if (error.isForMainFrame && mounted) {
-              setState(() => _error = '页面加载失败：' + error.description);
+            if (error.isForMainFrame == true && mounted) {
+              setState(() => _error = '页面加载失败：${error.description}');
             }
           },
         ),
