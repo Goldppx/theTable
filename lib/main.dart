@@ -143,7 +143,6 @@ class CourseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -157,7 +156,7 @@ class CourseCard extends StatelessWidget {
                 width: 5,
                 height: 78,
                 decoration: BoxDecoration(
-                  color: course.color ?? colors.primary,
+                  color: course.color,
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
