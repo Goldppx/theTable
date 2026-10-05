@@ -11,8 +11,8 @@ const fixture = '''<script>var captchaSwitch = "2";</script>
 <form id="pwdFromId" action="/authserver/login"><input id="pwdEncryptSalt" value="1234567890abcdef">
 <input name="execution" value="e1s1"><input name="lt" value=""></form>''';
 class FakeCampus implements CampusTransport {
-  FakeCampus({this.needCaptcha = false, this.ticket = true, this.businessSession = true, this.graduate = false});
-  final bool needCaptcha, ticket, businessSession, graduate;
+  FakeCampus({this.needCaptcha = false, this.ticket = true, this.businessSession = true, this.graduate = false, this.htmlRelay = false, this.expired = false});
+  final bool needCaptcha, ticket, businessSession, graduate, htmlRelay, expired;
   final jar = CookieJar();
   final calls = <Map<String, Object?>>[];
   @override
@@ -22,6 +22,7 @@ class FakeCampus implements CampusTransport {
     calls.add({'uri': uri, 'method': method, 'headers': headers, 'body': body});
     if (uri.host == 'auth.ncist.edu.cn' && uri.path == '/authserver/login') {
       if (method == 'POST') {
+        if (expired) return CampusResponse(uri, 302, '', location: '/authserver/login');
         return CampusResponse(uri, 302, '', location: 'https://my1.ncist.edu.cn/login${ticket ? '?ticket=ST-test' : ''}');
       }
       if (uri.queryParameters['service'] == 'https://gms.ncist.edu.cn/') {
@@ -36,6 +37,7 @@ class FakeCampus implements CampusTransport {
     if (uri.path.endsWith('verifySliderCaptcha.htl')) return CampusResponse(uri, 200, '{"errorCode":1}');
     if (uri.host == 'my1.ncist.edu.cn' && uri.path == '/login') {
       await jar.saveFromResponse(uri, [Cookie('PORTAL', 'portal')..path = '/'..httpOnly = true..secure = true]);
+      if (htmlRelay) return CampusResponse(uri, 200, '<meta http-equiv="refresh" content="0; url=/xs/index.html#/">');
       return CampusResponse(uri, 302, '', location: '/xs/index.html#/');
     }
     if (uri.path == '/getLoginUser') return CampusResponse(uri, 200, jsonEncode({'errcode': 0, 'data': {'userNo': '202500000001', 'userName': '测试学生', 'categoryName': graduate ? '研究生' : '本科生'}}));
@@ -90,12 +92,26 @@ void main() {
     expect(await native.verifySlider({'canvasLength': 280, 'moveLength': 100, 'tracks': [{'a': 0, 'b': 0, 'c': 0}, {'a': 100, 'b': 1, 'c': 600}]}), isTrue);
     await native.submit('202500000001', 'test-password');
   });
-  test('CAS ticket and business cookie are required for login success', () async {
-    for (final http in [FakeCampus(ticket: false), FakeCampus(businessSession: false)]) {
+  test('expired CAS or missing business session rejects login', () async {
+    for (final http in [FakeCampus(expired: true), FakeCampus(businessSession: false)]) {
       final native = NativeCampusAuth(auth: CampusAuthService(), http: http);
       await native.prepare('202500000001');
       await expectLater(native.submit('202500000001', 'test-password'), throwsFormatException);
     }
+  });
+  test('valid portal and business sessions authenticate without visible ST query', () async {
+    final native = NativeCampusAuth(auth: CampusAuthService(), http: FakeCampus(ticket: false, htmlRelay: true));
+    await native.prepare('202500000001');
+    expect((await native.submit('202500000001', 'test-password')).studentNumber, '202500000001');
+    expect(native.diagnosticReport, contains('my1.ncist.edu.cn/login → HTTP 200'));
+    expect(native.diagnosticReport, isNot(contains('test-password')));
+    expect(native.diagnosticReport, isNot(contains('202500000001')));
+  });
+  test('relay parsing accepts literal redirects and ignores conditional scripts', () {
+    expect(NativeCampusAuth.pageRedirect('<meta http-equiv="refresh" content="0; URL=&quot;/login?ticket=x&quot;">'), '/login?ticket=x');
+    expect(NativeCampusAuth.pageRedirect("<script>window.location.replace('/login');</script>"), '/login');
+    expect(NativeCampusAuth.pageRedirect("<script>if (failed) window.location='/login';</script>"), isNull);
+    expect(NativeCampusAuth.loginError('<span id="msg">认证服务暂时不可用</span>'), '认证服务暂时不可用');
   });
   test('graduate flow establishes its own authenticated service', () async {
     final http = FakeCampus(graduate: true); final native = NativeCampusAuth(auth: CampusAuthService(), http: http);

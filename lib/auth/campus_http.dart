@@ -63,6 +63,10 @@ class CampusHttp implements CampusTransport {
     final text = await response.transform(utf8.decoder).join().timeout(const Duration(seconds: 20));
     return CampusResponse(uri, response.statusCode, text, location: response.headers.value(HttpHeaders.locationHeader));
   }
+  Future<void> resetTransientCookies() async {
+    await _jar.deleteAll();
+    _records.clear();
+  }
   Future<void> persist(String studentNumber, String studentKind) => _storage.write(key: sessionKey,
       value: jsonEncode({'studentNumber': studentNumber, 'studentKind': studentKind, 'cookies': _records.values.toList()}));
 

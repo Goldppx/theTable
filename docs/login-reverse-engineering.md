@@ -36,3 +36,11 @@ CampusHttp 使用 CookieJar 处理域、路径、过期时间、Secure、HttpOnl
 仍需真实校园账号在手机上验证完整流程，当前环境没有账号密码。登录实现已经替换为原生协议；教务课表读取仍为页面表格适配，研究生页面的课表解析兼容性待验证。
 
 公开服务预检成功：带门户 service 的 CAS 登录 GET 返回 HTTP 200 和 JSESSIONID/route；移动端密码表单为 loginFromId，同 ID 的短信表单通过 cllt=userNameLogin 区分。toSliderCaptcha.htl 与 openSliderCaptcha.htl 均返回 HTTP 200，后者确实提供 smallImage/bigImage/tagWidth/yHeight。预检没有提交密码或验证码。解析同时支持原版 pwdFromId 和实际移动端密码表单。
+
+## 0.3.1 跳转兼容与排障
+
+用户反馈原版与 0.3.0 均出现“缺少 CAS 票据”。该消息由客户端的 ST- 查询参数检查生成，无法据此判断密码是否正确或学校故障。新实现把有效门户身份和业务会话作为成功条件，保持 errcode/data、学生身份、业务 Cookie 检查；兼容 HTTP 跳转、meta refresh 和独立脚本中的字面量 location 赋值/replace/assign。条件脚本不执行。所有跳转继续受学校 HTTPS origin 与次数限制约束。
+
+每次重新准备认证都会重置内存中的临时 Cookie，避免半完成会话干扰重新登录。失败时可复制请求方法、域名、路径和 HTTP 状态；诊断不包含查询参数、请求体、账号、密码或 Cookie。
+
+本次公开访问 CAS、门户与教务服务出现超时；当前环境网络与服务器故障无法区分。尚需手机端真实登录诊断确认现场根因。

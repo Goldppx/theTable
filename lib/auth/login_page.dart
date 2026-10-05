@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'campus_auth.dart';
 import 'campus_http.dart';
 import 'native_auth.dart';
@@ -87,6 +88,11 @@ class _CampusLoginPageState extends State<CampusLoginPage> {
           TextButton.icon(onPressed: _busy ? null : () => _run(_native.refreshSlider), icon: const Icon(Icons.refresh), label: const Text('更换验证图片')),
         ],
         if (_message != null) Padding(padding: const EdgeInsets.symmetric(vertical: 16), child: Text(_message!, semanticsLabel: _message)),
+        if (_message != null && _native.diagnostics.isNotEmpty) TextButton.icon(
+          icon: const Icon(Icons.copy), label: const Text('复制登录诊断'), onPressed: () async {
+            await Clipboard.setData(ClipboardData(text: _native.diagnosticReport));
+            if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已复制请求路径和状态码')));
+          }),
         const SizedBox(height: 24),
         FilledButton(onPressed: _busy ? null : _submit, child: Padding(padding: const EdgeInsets.all(12), child: Text(_busy ? '正在连接校园系统…' : '登录'))),
         const SizedBox(height: 16),
