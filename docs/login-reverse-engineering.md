@@ -17,8 +17,20 @@ APK SHA256: db164ff9634bf5b637ced3916c70a5604166b3b411d3b983a63490a164badcb8
 - 本科教务 establishJwxtSession：jw.cidp.edu.cn/LoginHandler.ashx，Referer 是门户根地址，检查 EXESAC.SAAS.SessionId。研究生使用 gms.ncist.edu.cn。
 - 直接获取学校公开登录页成功，页面包含 execution、16 字符 pwdEncryptSalt 和 captchaSwitch=2。未发送密码或测试虚构登录。
 
-## 本次实现边界
+## 0.3.0 原生实现
 
-Flutter 继续使用学校 WebView 页面执行密码加密、滑块验证和 CAS 跳转；没有实现原版的 native authFetch、AES 或独立滑块。修复的是门户身份字段映射、会话建立后的重复检测、错误响应验证、账号兜底和本科教务入口。账号仅暂存内存，不读取或保存密码。门户身份保存在安全存储中，WebView 使用其自身 Cookie 存储。
+Flutter 原生表单通过 CampusHttp 请求 CAS，按 prepareLogin → openSliderChallenge → verifySlider → submitLogin 顺序执行。CasCrypto 使用原版字符集生成 16 字符 IV 和 64 字符前缀，AES-128-CBC/PKCS7 后只传 Base64 密文。滑块 sign 同样调用 encryptPassword(JSON.stringify(payload), key)，key 取 smallImage 解码后的最后 16 字节。
 
-身份成功读取不等于教务 Session 已验证；没有真实校园账号，无法验证完整登录和教务课表流程。发布包需要用户在设备上验证。研究生课表同步尚未实现。
+SliderCaptcha function 8122 的实际配置为 canvasLength=280、画布 280×155、手柄 40、最大位移 240。smallImage 按 tagWidth/590×280−2 缩放为全高透明拼图条。轨迹是用户触摸产生的 a（水平位移）、b（垂直位移）、c（毫秒耗时），约每 20ms/移动 2px 采样。服务器 errorCode=1 才允许继续提交账号密码；不会求解验证码或合成拖动轨迹。
+
+登录提交参数 username/password/captcha/_eventId=submit/cllt=userNameLogin/dllt=generalLogin/lt/execution，POST 地址保留 service 查询参数，与原版 parseLoginPage 返回的固定 actionUrl 一致。
+
+手动跟随最多 12 次跳转，只允许原版四个 HTTPS origin；原版 HTTP auth.ncist.edu.cn 跳转升级 HTTPS。CAS 成功必须包含 ST- 票据、有效门户身份和业务会话。本科检查 EXESAC.SAAS.SessionId；研究生检查 JSESSIONID 与 SSO_LOGIN。原版 categoryWid/categoryWId=2000002 判为研究生，其余依据 categoryName。
+
+CampusHttp 使用 CookieJar 处理域、路径、过期时间、Secure、HttpOnly。Cookie 在完成认证和业务会话验证后写入 FlutterSecureStorage；密码只在输入框内存中持有。进入教务页时通过 Android CookieManager 桥接原始 Set-Cookie 属性，退出账号会清除保存的会话和 WebView Cookie。
+
+## 验证范围
+
+测试使用独立 Python cryptography 生成 AES 与滑块 sign 向量，并模拟 CAS → 门户 → 教务完整请求流，检查缺少票据、滑块未验证、教务会话缺失、非学校跳转、Cookie 作用域等失败路径。
+
+仍需真实校园账号在手机上验证完整流程，当前环境没有账号密码。登录实现已经替换为原生协议；教务课表读取仍为页面表格适配，研究生页面的课表解析兼容性待验证。

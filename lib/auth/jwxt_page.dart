@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../services/schedule_parser.dart';
 import 'campus_auth.dart';
+import 'session_bridge.dart';
 
 class OfficialJwxtPage extends StatefulWidget {
   const OfficialJwxtPage({super.key});
@@ -22,7 +23,18 @@ class _OfficialJwxtPageState extends State<OfficialJwxtPage> {
         if (mounted) setState(() { loading = true; error = null; });
       }, onPageFinished: (_) { if (mounted) setState(() => loading = false); },
         onWebResourceError: (e) { if (mounted && e.isForMainFrame == true) setState(() { loading = false; error = e.description; }); }))
-      ..loadRequest(Uri.parse('https://jw.cidp.edu.cn/LoginHandler.ashx'), headers: {'Referer': '${CampusAuthService.portalOrigin}/'});
+;
+    _openSession();
+  }
+  Future<void> _openSession() async {
+    try {
+      final kind = await CampusSessionBridge.restoreToWebView();
+      if (!mounted) return;
+      final uri = kind == 'graduate' ? Uri.parse('https://gms.ncist.edu.cn/grzxgl/') : Uri.parse('https://jw.cidp.edu.cn/LoginHandler.ashx');
+      await controller.loadRequest(uri, headers: {'Referer': '${CampusAuthService.portalOrigin}/'});
+    } catch (_) {
+      if (mounted) setState(() { loading = false; error = '登录会话恢复失败，请重新登录'; });
+    }
   }
   Future<void> read() async {
     setState(() => reading = true);

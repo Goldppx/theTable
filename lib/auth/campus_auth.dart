@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'session_bridge.dart';
 
 class CampusProfile {
   const CampusProfile({
@@ -48,10 +49,7 @@ class CampusProfile {
   }
 }
 
-/// Uses the same official CAS → portal redirect route observed in UEM Connect.
-///
-/// Password encryption and slider/CAPTCHA handling stay in the university's
-/// own login page, so this app never receives or stores a password.
+/// Official CAS service route and secure profile storage shared by native login.
 class CampusAuthService {
   CampusAuthService({FlutterSecureStorage? storage})
       : _storage = storage ?? const FlutterSecureStorage();
@@ -94,7 +92,10 @@ class CampusAuthService {
   Future<void> saveProfile(CampusProfile profile) =>
       _storage.write(key: _profileKey, value: jsonEncode(profile.toJson()));
 
-  Future<void> clearProfile() => _storage.delete(key: _profileKey);
+  Future<void> clearProfile() async {
+    await CampusSessionBridge.clear();
+    await _storage.delete(key: _profileKey);
+  }
 
   CampusProfile parsePortalIdentity(String raw, {String? username}) {
     final decoded = jsonDecode(raw);

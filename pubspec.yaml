@@ -1,12 +1,15 @@
 name: the_table
 description: A clean-room Flutter campus companion.
 publish_to: none
-version: 0.2.1+3
+version: 0.3.0+4
 
 environment:
   sdk: ^3.6.0
 
 dependencies:
+  cookie_jar: ^4.0.8
+  html: ^0.15.6
+  pointycastle: ^4.0.0
   flutter_map: ^8.2.2
   latlong2: ^0.9.1
   geolocator: ^14.0.2
