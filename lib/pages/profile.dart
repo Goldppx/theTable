@@ -55,7 +55,10 @@ class ProfilePage extends StatelessWidget {
         Text(p == null ? '连接校园账号' : (p.name.isEmpty ? '校园用户' : p.name), style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 6), Text(p?.studentNumber ?? '登录后读取学校门户资料', style: Theme.of(context).textTheme.bodyLarge),
         const SizedBox(height: 20),
-        _info(context, '专业', p?.major ?? '待学校门户提供'), const SizedBox(height: 12),
+        _info(context, '培养层次', _value(p?.education)), const SizedBox(height: 12),
+        _info(context, '专业', _value(p?.major)), const SizedBox(height: 12),
+        _info(context, '班级', _value(p?.className)), const SizedBox(height: 12),
+        _info(context, '学院', _value(p?.college)), const SizedBox(height: 12),
         _info(context, '认证状态', p == null ? '等待登录' : '已保存身份'),
       ]))), const SizedBox(height: 18),
       Card(child: Padding(padding: const EdgeInsets.all(18), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -76,6 +79,7 @@ class ProfilePage extends StatelessWidget {
         children: const [Text('Flutter / Material 3\n地图：© OpenStreetMap contributors · Esri\n真实课程网页解析待账号验证。')])),
     ]);
   }
+  String _value(String? value) => value == null || value.isEmpty ? '待学校门户提供' : value;
   Widget _info(BuildContext context, String label, String value) => Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
     Text(label, style: Theme.of(context).textTheme.bodyLarge), const SizedBox(width: 24),
     Expanded(child: Text(value, textAlign: TextAlign.end, style: const TextStyle(fontSize: 16))),

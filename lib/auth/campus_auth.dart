@@ -7,16 +7,22 @@ class CampusProfile {
     required this.studentNumber,
     required this.name,
     this.major,
+    this.education,
+    this.className,
+    this.college,
   });
 
   final String studentNumber;
   final String name;
-  final String? major;
+  final String? major, education, className, college;
 
   Map<String, String?> toJson() => {
         'studentNumber': studentNumber,
         'name': name,
         'major': major,
+        'education': education,
+        'className': className,
+        'college': college,
       };
 
   factory CampusProfile.fromJson(Map<String, dynamic> json) {
@@ -35,6 +41,9 @@ class CampusProfile {
       studentNumber: read(const ['studentNumber', 'userName', 'username']),
       name: read(const ['name', 'realName', 'xm']),
       major: major.isEmpty ? null : major,
+      education: read(const ['education', 'educationLevel', '培养层次']),
+      className: read(const ['className', 'bjmc', '班级']),
+      college: read(const ['college', 'departmentName', '学院']),
     );
   }
 }

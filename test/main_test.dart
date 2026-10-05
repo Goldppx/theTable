@@ -13,6 +13,14 @@ import 'package:the_table/services/schedule_parser.dart';
 const course = Course(name: '数据结构', teacher: '张老师', room: '明德楼 30504', weekday: 1,
   startPeriod: 3, endPeriod: 4, weeks: [1, 3, 5], colorIndex: 0);
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(() async {
+    final fontPath = File('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc');
+    if (fontPath.existsSync()) {
+      final loader = FontLoader('Roboto')..addFont(Future.value(ByteData.sublistView(fontPath.readAsBytesSync())));
+      await loader.load();
+    }
+  });
   test('course week filtering and field validation', () {
     expect(course.occursIn(3), isTrue);
     expect(course.occursIn(2), isFalse);
@@ -50,13 +58,13 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    final fontPath = File('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc');
-    if (fontPath.existsSync()) {
-      final loader = FontLoader('Roboto')..addFont(Future.value(ByteData.sublistView(fontPath.readAsBytesSync())));
-      await loader.load();
-    }
     final state = CampusState(persist: false)..ready = true;
-    await state.importSchedule(jsonEncode({'courses': [course.toJson()],
+    await state.importSchedule(jsonEncode({'courses': [course.toJson(),
+      const Course(name: '操作系统', teacher: '李老师', room: '博观楼 10405', weekday: 2, startPeriod: 3, endPeriod: 4, weeks: [1], colorIndex: 2).toJson(),
+      const Course(name: '大学英语', teacher: '王老师', room: '明德楼 30707', weekday: 5, startPeriod: 3, endPeriod: 4, weeks: [1], colorIndex: 3).toJson(),
+      const Course(name: '概率论', teacher: '陈老师', room: '致远楼 20603', weekday: 1, startPeriod: 5, endPeriod: 6, weeks: [1], colorIndex: 4).toJson(),
+      const Course(name: '物理实验', teacher: '赵老师', room: '实验楼 618', weekday: 3, startPeriod: 7, endPeriod: 8, weeks: [1], colorIndex: 7).toJson(),
+    ],
       'semesterStart': DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1)).toIso8601String(), 'totalWeeks': 20}));
     await tester.pumpWidget(RepaintBoundary(key: const Key('preview'), child: TheTableApp(state: state)));
     await tester.pumpAndSettle();
@@ -76,6 +84,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('本机账号'), findsOneWidget);
     await snapshot(tester, 'profile');
+    await tester.ensureVisible(find.text('外观'));
     await tester.tap(find.text('外观'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('浅色'));
@@ -102,10 +111,12 @@ void main() {
   });
 }
 Future<void> snapshot(WidgetTester tester, String name) async {
+  await tester.runAsync(() async {
   final boundary = tester.renderObject<RenderRepaintBoundary>(find.byKey(const Key('preview')));
   final image = await boundary.toImage(pixelRatio: 2);
   final data = await image.toByteData(format: ui.ImageByteFormat.png);
   final directory = Directory('build/previews')..createSync(recursive: true);
   File('${directory.path}/$name.png').writeAsBytesSync(data!.buffer.asUint8List());
   image.dispose();
+  });
 }
