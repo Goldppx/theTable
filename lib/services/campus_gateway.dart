@@ -17,3 +17,4 @@ class DemoCampusGateway {
         Course(name: '移动应用开发', teacher: '王老师', room: '主楼 B201', weekday: 3, startPeriod: 6, endPeriod: 7),
       ];
 }
+

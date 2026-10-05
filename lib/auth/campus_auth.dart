@@ -105,3 +105,4 @@ class CampusAuthService {
     return profile;
   }
 }
+

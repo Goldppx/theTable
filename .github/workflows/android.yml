@@ -1,19 +1,21 @@
 name: Build Android APK
-
 on:
   pull_request:
   push:
-    branches:
-      - main
-      - feat/flutter-md3-rewrite
+    branches: [main, feat/flutter-md3-rewrite]
+    tags: ['v*']
   workflow_dispatch:
-
 permissions:
-  contents: write
-
+  contents: read
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
@@ -22,29 +24,60 @@ jobs:
           java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.47.5'
           channel: stable
+          cache: true
       - name: Create Android host project
         run: |
           flutter create --platforms=android --project-name=the_table --org=cn.edu.ncist.it .
           rm -f test/widget_test.dart
-          grep -q 'android.permission.INTERNET' android/app/src/main/AndroidManifest.xml || sed -i '/<manifest /a\    <uses-permission android:name="android.permission.INTERNET" />' android/app/src/main/AndroidManifest.xml
+          python3 scripts/configure_android.py
       - name: Install dependencies
         run: flutter pub get
       - name: Analyze
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
+      - name: Install preview fonts
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
       - name: Test
         run: flutter test
-      - name: Build release APK
-        run: flutter build apk --release
-      - name: Upload APK artifact
+      - name: Build release APKs
+        run: |
+          flutter build apk --release --split-per-abi
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk dist/theTable-0.2.0-arm64-v8a.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk dist/theTable-0.2.0-armeabi-v7a.apk
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk dist/theTable-0.2.0-x86_64.apk
+          cd dist
+          sha256sum *.apk > SHA256SUMS
+      - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: theTable-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-      - name: Publish prerelease
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+          name: theTable-0.2.0-apks
+          path: dist/
+          retention-days: 30
+      - name: Upload UI previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: theTable-ui-previews
+          path: build/previews/
+          if-no-files-found: ignore
+      - name: Publish preview build
+        if: github.event_name == 'push' && github.ref == 'refs/heads/feat/flutter-md3-rewrite'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: preview-${{ github.sha }}
+          target_commitish: ${{ github.sha }}
+          name: 'theTable 0.2.0 · Preview'
           prerelease: true
+          body: |
+            Reference-style Flutter UI, native weekly timetable with local JSON import,
+            map layers and saved markers, profile and appearance settings.
+            School HTML timetable import is experimental and requires real-account validation.
+            Android preview APKs use the Flutter development signing configuration.
+          files: dist/*
+      - name: Publish tagged release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
           generate_release_notes: true
-          files: build/app/outputs/flutter-apk/app-release.apk
+          files: dist/*
