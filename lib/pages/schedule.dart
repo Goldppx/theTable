@@ -102,11 +102,12 @@ class _SchedulePageState extends State<SchedulePage> {
           TextButton(onPressed: import, child: const Text('导入'))])),
       Expanded(child: LayoutBuilder(builder: (context, constraints) {
         // Horizontal scrolling keeps text legible on narrow phones and enlarged fonts.
-        final width = constraints.maxWidth < 390 ? 390.0 : constraints.maxWidth;
-        const gutter = 38.0;
+        final minimumWidth = 390.0 * scale;
+        final width = constraints.maxWidth < minimumWidth ? minimumWidth : constraints.maxWidth;
+        final gutter = 38.0 * scale;
         final dayWidth = (width - gutter) / 7;
         return SingleChildScrollView(scrollDirection: Axis.horizontal, child: SizedBox(width: width, child: Column(children: [
-          SizedBox(height: 52 * scale, child: Row(children: [const SizedBox(width: gutter, child: Center(child: Text('节', style: TextStyle(fontSize: 12)))),
+          SizedBox(height: 52 * scale, child: Row(children: [SizedBox(width: gutter, child: const Center(child: Text('节', style: TextStyle(fontSize: 12)))),
             ...List.generate(7, (day) {
               final date = monday.add(Duration(days: day));
               final now = DateTime.now();
