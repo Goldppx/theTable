@@ -38,12 +38,12 @@ class CampusProfile {
 
     final major = read(const ['major', 'zy', '专业']);
     return CampusProfile(
-      studentNumber: read(const ['studentNumber', 'userName', 'username']),
-      name: read(const ['name', 'realName', 'xm']),
+      studentNumber: read(const ['studentNumber', 'studentNo', 'xh', 'userNo', 'loginName', 'username']),
+      name: read(const ['name', 'realName', 'userName', 'xm']),
       major: major.isEmpty ? null : major,
       education: read(const ['education', 'educationLevel', '培养层次']),
       className: read(const ['className', 'bjmc', '班级']),
-      college: read(const ['college', 'departmentName', '学院']),
+      college: read(const ['college', 'organization', 'deptName', 'departmentName', 'orgName', '学院']),
     );
   }
 }
@@ -96,20 +96,31 @@ class CampusAuthService {
 
   Future<void> clearProfile() => _storage.delete(key: _profileKey);
 
-  CampusProfile parsePortalIdentity(String raw) {
+  CampusProfile parsePortalIdentity(String raw, {String? username}) {
     final decoded = jsonDecode(raw);
     if (decoded is! Map) {
       throw const FormatException('门户未返回身份信息');
     }
 
     final root = Map<String, dynamic>.from(decoded);
+    if ((root['errcode'] ?? '0').toString() != '0') {
+      throw const FormatException('门户会话尚未建立，请完成统一认证');
+    }
     final nested = root['data'];
-    final payload = nested is Map
-        ? Map<String, dynamic>.from(nested)
-        : root;
-    final profile = CampusProfile.fromJson(payload);
-    if (profile.studentNumber.isEmpty) {
-      throw const FormatException('未能从门户读取学号');
+    if (nested is! Map) {
+      throw const FormatException('门户没有返回有效的用户身份');
+    }
+    final payload = Map<String, dynamic>.from(nested);
+    final department = (payload['deptName'] ?? payload['departmentName'] ?? '').toString();
+    final parts = department.split('/').where((part) => part.trim().isNotEmpty).toList();
+    if (payload['major'] == null && parts.isNotEmpty) payload['major'] = parts.last.trim();
+    if (payload['education'] == null) payload['education'] = payload['categoryName'];
+    var profile = CampusProfile.fromJson(payload);
+    if (profile.studentNumber.isEmpty && username != null && username.trim().isNotEmpty) {
+      profile = CampusProfile.fromJson({...payload, 'studentNumber': username.trim()});
+    }
+    if (profile.studentNumber.isEmpty || profile.name.isEmpty) {
+      throw const FormatException('门户身份缺少学号或姓名，请重新检测登录');
     }
     return profile;
   }

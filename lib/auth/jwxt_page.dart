@@ -22,7 +22,7 @@ class _OfficialJwxtPageState extends State<OfficialJwxtPage> {
         if (mounted) setState(() { loading = true; error = null; });
       }, onPageFinished: (_) { if (mounted) setState(() => loading = false); },
         onWebResourceError: (e) { if (mounted && e.isForMainFrame == true) setState(() { loading = false; error = e.description; }); }))
-      ..loadRequest(Uri.parse('${CampusAuthService.portalOrigin}/xs/index.html#/'));
+      ..loadRequest(Uri.parse('https://jw.cidp.edu.cn/LoginHandler.ashx'), headers: {'Referer': '${CampusAuthService.portalOrigin}/'});
   }
   Future<void> read() async {
     setState(() => reading = true);
@@ -57,7 +57,7 @@ class _OfficialJwxtPageState extends State<OfficialJwxtPage> {
     appBar: AppBar(title: const Text('教务课表同步'), actions: [IconButton(tooltip: '刷新网页', onPressed: controller.reload, icon: const Icon(Icons.refresh))]),
     body: Column(children: [
       Padding(padding: const EdgeInsets.all(12), child: Row(children: [
-        const Expanded(child: Text('在校园门户进入个人课表，再读取当前页面。', style: TextStyle(fontSize: 12))), const SizedBox(width: 8),
+        const Expanded(child: Text('在教务系统进入个人课表，再读取当前页面。', style: TextStyle(fontSize: 12))), const SizedBox(width: 8),
         FilledButton(onPressed: reading || loading ? null : read, child: Text(reading ? '读取中…' : '读取课表')),
       ])),
       if (loading) const LinearProgressIndicator(),

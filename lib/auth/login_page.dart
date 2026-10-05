@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -17,10 +19,16 @@ class _CampusLoginPageState extends State<CampusLoginPage> {
   bool _loading = true;
   bool _readingProfile = false;
   String? _error;
+  String? _username;
+  Timer? _poll;
+  bool _completed = false;
 
   @override
   void initState() {
     super.initState();
+    _poll = Timer.periodic(const Duration(seconds: 2), (_) async {
+      if (!_completed) _readPortalIdentity(await _controller.currentUrl() ?? '');
+    });
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..addJavaScriptChannel(
@@ -34,6 +42,21 @@ class _CampusLoginPageState extends State<CampusLoginPage> {
           },
           onPageFinished: (url) {
             if (mounted) setState(() => _loading = false);
+            if (Uri.tryParse(url)?.host == 'auth.ncist.edu.cn') {
+              _controller.runJavaScript(r''' 
+                (() => {
+                  if (window.__campusUsernameWatch) return;
+                  window.__campusUsernameWatch = true;
+                  function report() {
+                    const input = document.querySelector('input[name="username"]');
+                    if (input && input.value.trim()) CampusAuth.postMessage(JSON.stringify({username: input.value.trim()}));
+                  }
+                  document.addEventListener('input', report);
+                  document.addEventListener('submit', report, true);
+                  report();
+                })();
+              ''');
+            }
             _readPortalIdentity(url);
           },
           onWebResourceError: (error) {
@@ -48,39 +71,68 @@ class _CampusLoginPageState extends State<CampusLoginPage> {
 
   Future<void> _readPortalIdentity(String url) async {
     final uri = Uri.tryParse(url);
-    if (_readingProfile || uri?.host != 'my1.ncist.edu.cn') return;
+    if (_completed || _readingProfile || uri?.scheme != 'https' || uri?.host != 'my1.ncist.edu.cn') return;
 
     _readingProfile = true;
+    try {
     await _controller.runJavaScript('''
-      fetch('/getLoginUser?_t=' + Date.now(), { credentials: 'include' })
+      Promise.race([fetch('/getLoginUser?_t=' + Date.now(), { credentials: 'include', headers: {Accept: 'application/json, text/plain, */*'} }), new Promise((_, reject) => setTimeout(() => reject('timeout'), 8000))])
         .then((response) =>
           response.ok ? response.text() : Promise.reject(response.status))
         .then((body) => CampusAuth.postMessage(body))
         .catch(() => CampusAuth.postMessage(''));
     ''');
+    } catch (_) { _readingProfile = false; }
   }
 
   Future<void> _complete(String raw) async {
     final current = Uri.tryParse(await _controller.currentUrl() ?? '');
-    if (current?.host != 'my1.ncist.edu.cn') return;
+    if (_completed || !mounted) return;
+    if (current?.scheme != 'https') { _readingProfile = false; return; }
+    if (current?.host == 'auth.ncist.edu.cn') {
+      try {
+        final message = jsonDecode(raw);
+        if (message is Map && message['username'] is String) _username = message['username'] as String;
+      } catch (_) { /* Ignore non-identity messages. */ }
+      return;
+    }
+    if (current?.host != 'my1.ncist.edu.cn') { _readingProfile = false; return; }
     try {
-      final profile = widget.auth.parsePortalIdentity(raw);
+      final profile = widget.auth.parsePortalIdentity(raw, username: _username);
       await widget.auth.saveProfile(profile);
+      _completed = true;
+      _poll?.cancel();
       if (mounted) Navigator.of(context).pop(profile);
-    } on FormatException {
+    } catch (error) {
       if (mounted) {
         setState(() {
           _readingProfile = false;
-          _error = '认证尚未完成。请在学校登录页完成账号、密码和验证码验证。';
+          _error = error is FormatException ? error.message.toString() : '身份保存失败，请重试。';
         });
       }
     }
   }
 
   @override
+  void dispose() {
+    _poll?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('校园账号认证')),
+      appBar: AppBar(title: const Text('校园账号认证'), actions: [
+        IconButton(tooltip: '检测登录', icon: const Icon(Icons.verified_user_outlined), onPressed: () async {
+          _readingProfile = false;
+          await _readPortalIdentity(await _controller.currentUrl() ?? '');
+        }),
+        IconButton(tooltip: '重新加载认证', icon: const Icon(Icons.refresh), onPressed: () {
+          _readingProfile = false;
+          setState(() => _error = null);
+          _controller.loadRequest(widget.auth.loginUri);
+        }),
+      ]),
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),
