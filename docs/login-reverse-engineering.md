@@ -34,3 +34,5 @@ CampusHttp 使用 CookieJar 处理域、路径、过期时间、Secure、HttpOnl
 测试使用独立 Python cryptography 生成 AES 与滑块 sign 向量，并模拟 CAS → 门户 → 教务完整请求流，检查缺少票据、滑块未验证、教务会话缺失、非学校跳转、Cookie 作用域等失败路径。
 
 仍需真实校园账号在手机上验证完整流程，当前环境没有账号密码。登录实现已经替换为原生协议；教务课表读取仍为页面表格适配，研究生页面的课表解析兼容性待验证。
+
+公开服务预检成功：带门户 service 的 CAS 登录 GET 返回 HTTP 200 和 JSESSIONID/route；移动端密码表单为 loginFromId，同 ID 的短信表单通过 cllt=userNameLogin 区分。toSliderCaptcha.htl 与 openSliderCaptcha.htl 均返回 HTTP 200，后者确实提供 smallImage/bigImage/tagWidth/yHeight。预检没有提交密码或验证码。解析同时支持原版 pwdFromId 和实际移动端密码表单。

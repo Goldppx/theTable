@@ -76,7 +76,7 @@ class NativeCampusAuth {
     sliderVerified = false;
     if (!response.isRedirect) {
       final document = html.parse(response.body);
-      final messages = document.querySelectorAll('#showErrorTip, .form-error').map((e) => e.text.trim()).where((e) => e.isNotEmpty).toList();
+      final messages = document.querySelectorAll('#showErrorTip, .form-error, #formErrorTip2').map((e) => e.text.trim()).where((e) => e.isNotEmpty).toList();
       throw FormatException(messages.isEmpty ? '统一认证未接受本次登录，请重新输入账号、密码并验证滑块' : messages.first);
     }
     final portal = await _follow(response, requireTicket: true);

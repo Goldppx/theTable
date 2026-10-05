@@ -9,7 +9,10 @@ class CasPage {
   final String salt, execution, lt, captchaSwitch;
   factory CasPage.parse(String source) {
     final document = html.parse(source);
-    final form = document.querySelector('#pwdFromId');
+    final passwordForms = document.querySelectorAll('form').where((form) =>
+        form.querySelector('#pwdEncryptSalt') != null &&
+        form.querySelector('[name="cllt"]')?.attributes['value'] == 'userNameLogin');
+    final form = passwordForms.isNotEmpty ? passwordForms.first : document.querySelector('#pwdFromId');
     String field(String key) => form?.querySelector('[id="$key"], [name="$key"]')?.attributes['value'] ?? '';
     final salt = field('pwdEncryptSalt');
     final execution = field('execution');

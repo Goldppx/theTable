@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,6 +55,11 @@ void main() {
     final page = CasPage.parse('<form><input name="execution" value="wrong"></form>$fixture');
     expect(page.execution, 'e1s1'); expect(page.lt, ''); expect(page.captchaSwitch, '2');
     expect(() => CasPage.parse('<html>maintenance</html>'), throwsFormatException);
+  });
+  test('live mobile template selects password form among duplicate IDs', () {
+    final mobile = '<form id="loginFromId"><input name="cllt" value="dynamicLogin"><input name="execution" value="wrong"></form>'
+        '<form id="loginFromId"><input name="cllt" value="userNameLogin"><input id="pwdEncryptSalt" value="1234567890abcdef"><input name="execution" value="e1s1"></form>';
+    expect(CasPage.parse(mobile).execution, 'e1s1');
   });
   test('AES CBC matches independent Python cryptography vector', () {
     expect(CasCrypto.encrypt('test-password', '1234567890abcdef', prefix: 'A' * 64, iv: 'abcdefghijklmnop'),
