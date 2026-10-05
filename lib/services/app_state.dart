@@ -69,6 +69,7 @@ class CampusState extends ChangeNotifier {
         if (count < 1 || count > 30) throw const FormatException('学期周数范围为 1–30');
       }
     } else { throw const FormatException('请导入课程 JSON 数组或含 courses 的对象'); }
+    start = DateTime(start.year, start.month, start.day).subtract(Duration(days: start.weekday - 1));
     final parsed = items.map((e) => Course.fromJson(Map<String, dynamic>.from(e as Map))).toList();
     // Validate the complete document before replacing the existing cache.
     final stamp = DateTime.now();

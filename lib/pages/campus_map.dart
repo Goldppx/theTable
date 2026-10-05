@@ -41,8 +41,10 @@ class _CampusMapPageState extends State<CampusMapPage> {
         decoration: const InputDecoration(labelText: '地点名称', hintText: '图书馆、食堂、教学楼…')),
       actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('取消')),
         FilledButton(onPressed: () { if (text.text.trim().isNotEmpty) Navigator.pop(ctx, text.text.trim()); }, child: const Text('保存'))]));
-    if (name != null) await widget.state.savePlaces([...widget.state.places,
-      {'name': name, 'latitude': point.latitude, 'longitude': point.longitude}]);
+    if (name != null) {
+      await widget.state.savePlaces([...widget.state.places,
+        {'name': name, 'latitude': point.latitude, 'longitude': point.longitude}]);
+    }
   }
   void manage() => showModalBottomSheet<void>(context: context, showDragHandle: true, builder: (_) => ListenableBuilder(
     listenable: widget.state, builder: (ctx, _) => SafeArea(child: ListView(shrinkWrap: true, children: [
@@ -81,7 +83,7 @@ class _CampusMapPageState extends State<CampusMapPage> {
             urlTemplate: satellite ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
               : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'cn.edu.ncist.it.the_table', maxNativeZoom: satellite ? 18 : 19,
-            errorTileCallback: (_, _, _) { if (!tileError && mounted) {
+            errorTileCallback: (tile, error, stackTrace) { if (!tileError && mounted) {
               WidgetsBinding.instance.addPostFrameCallback((_) { if (mounted) setState(() => tileError = true); });
             }}),
           MarkerLayer(markers: [

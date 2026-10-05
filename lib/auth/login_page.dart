@@ -61,6 +61,8 @@ class _CampusLoginPageState extends State<CampusLoginPage> {
   }
 
   Future<void> _complete(String raw) async {
+    final current = Uri.tryParse(await _controller.currentUrl() ?? '');
+    if (current?.host != 'my1.ncist.edu.cn') return;
     try {
       final profile = widget.auth.parsePortalIdentity(raw);
       await widget.auth.saveProfile(profile);

@@ -58,7 +58,7 @@ flutter create --platforms=android --project-name=the_table --org=cn.edu.ncist.i
 rm -f test/widget_test.dart
 python3 scripts/configure_android.py
 flutter pub get
-flutter analyze --no-fatal-infos
+flutter analyze
 flutter test
 flutter build apk --release --split-per-abi
 ```

@@ -23,7 +23,7 @@ class ProfilePage extends StatelessWidget {
     }
   }
   void appearance(BuildContext context) => showModalBottomSheet<void>(context: context, showDragHandle: true,
-    builder: (ctx) => ListenableBuilder(listenable: state, builder: (_, _) => SafeArea(child: Padding(
+    builder: (ctx) => ListenableBuilder(listenable: state, builder: (context, child) => SafeArea(child: Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 24), child: Column(mainAxisSize: MainAxisSize.min, children: [
         const ListTile(title: Text('外观', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold))),
         SegmentedButton<ThemeMode>(segments: const [
