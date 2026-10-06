@@ -25,3 +25,5 @@ CI 在静态分析、单元/界面测试和三 ABI release 构建后，增加 An
 
 符号化参考：https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/Crashes.md
 AGP 原生库打包设置：https://developer.android.com/reference/tools/gradle-api/8.13/com/android/build/api/dsl/JniLibsPackaging
+
+模拟器首次 Release 冷启动另发现 WorkManager 初始化崩溃：WorkDatabase_Impl 的无参构造方法被 R8 移除。宿主配置已添加数据库和 Worker 反射构造方法保留规则；这项可复现问题与手机日志中的 Flutter SIGILL 分别处理。

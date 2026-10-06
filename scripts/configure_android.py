@@ -134,3 +134,11 @@ if 'useLegacyPackaging' not in text:
 else:
     text = text.replace('useLegacyPackaging = false', 'useLegacyPackaging = true')
 gradle.write_text(text)
+
+# Room and WorkManager construct these classes reflectively in release builds.
+rules = Path('android/app/campus-proguard-rules.pro')
+rules.write_text('# Preserve reflected database constructors and user-defined Worker constructors.\n-keep class androidx.work.impl.WorkDatabase_Impl { *; }\n-keep class * extends androidx.room.RoomDatabase { public <init>(); }\n-keep class * extends androidx.work.ListenableWorker {\n    public <init>(android.content.Context, androidx.work.WorkerParameters);\n}\n')
+text = gradle.read_text()
+if 'campus-proguard-rules.pro' not in text:
+    text = text.replace('release {', 'release {\n            proguardFiles("campus-proguard-rules.pro")', 1)
+gradle.write_text(text)
