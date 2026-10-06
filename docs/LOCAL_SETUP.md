@@ -19,7 +19,7 @@ flutter build apk --release --split-per-abi
 
 APK 位于 build/app/outputs/flutter-apk/。一般 Android 手机选择 arm64-v8a。CI 已提供相同生成、测试和构建流程，适合暂时不安装本地 Android 工具链时使用。
 
-生成脚本针对新建 Android 宿主执行一次；已经执行过后不需要每次重复。要重新生成宿主请先备份自己的 Android 签名/构建修改，再重新生成干净模板。
+生成脚本支持重复执行。修改 android_support 原生代码后重新运行它；它会更新 MainActivity 和 CampusTools，并维护所需权限、接收器及构建依赖。它会覆盖 MainActivity，其他自定义原生逻辑请放在独立文件中；正式签名配置请自行备份。
 
 ## 在 ChatGPT 桌面端继续
 
