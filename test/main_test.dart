@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:the_table/main.dart';
+import 'package:the_table/pages/profile.dart';
 import 'package:the_table/models/course.dart';
 import 'package:the_table/services/app_state.dart';
 import 'package:the_table/services/schedule_parser.dart';
@@ -84,7 +85,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('本机账号'), findsOneWidget);
     await snapshot(tester, 'profile');
-    await tester.ensureVisible(find.text('外观'));
+    await tester.scrollUntilVisible(find.text('外观'), 200, scrollable: find.descendant(of: find.byType(ProfilePage), matching: find.byType(Scrollable)).first);
     await tester.tap(find.text('外观'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('浅色'));
