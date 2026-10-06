@@ -78,7 +78,7 @@ class ProfilePage extends StatelessWidget {
       _tile(context, Icons.notifications_outlined, '通知', () => Navigator.push(context, MaterialPageRoute<void>(builder: (_) => NotificationSettingsPage(state: state)))), const SizedBox(height: 10),
       _tile(context, Icons.apps, '校园快捷方式', () => Navigator.push(context, MaterialPageRoute<void>(builder: (_) => ShortcutsPage(state: state)))), const SizedBox(height: 10),
       _tile(context, Icons.palette_outlined, '外观', () => appearance(context)), const SizedBox(height: 10),
-      _tile(context, Icons.info_outline, '关于', () => showAboutDialog(context: context, applicationName: '应大通', applicationVersion: '0.4.0',
+      _tile(context, Icons.info_outline, '关于', () => showAboutDialog(context: context, applicationName: '应大通', applicationVersion: '0.4.1',
         children: const [Text('Flutter / Material 3\n地图：高德官方 URI API\n真实课程网页解析待账号验证。')])),
     ]);
   }

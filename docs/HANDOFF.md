@@ -1,7 +1,7 @@
 # 本地接续说明
 
 项目：应大通 / theTable，仓库 Goldppx/theTable，PR #1，分支 feat/flutter-md3-rewrite。
-当前版本 0.4.0+6，Flutter Material 3 Android 应用。
+当前版本 0.4.1+7，Flutter Material 3 Android 应用。
 
 已实现：参考图深色布局、蓝色默认配色和动态取色开关、周课表与本地账号缓存、原生 CAS AES 登录与滑块认证、门户身份与本科/研究生会话检查、课前/早报/API 通知、包名与小程序 URL 快捷方式、高德 URI 地图和原生地图软件跳转。
 

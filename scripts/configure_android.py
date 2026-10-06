@@ -125,3 +125,12 @@ if 'com.android.tools:desugar_jdk_libs' not in text:
 if 'androidx.work:work-runtime' not in text:
     text += '\ndependencies { implementation("androidx.work:work-runtime-ktx:2.10.1") }\n'
 gradle.write_text(text)
+
+# Compatibility build: install native libraries as standalone files instead of
+# mapping libflutter.so directly from base.apk. Keep the official engine intact.
+text = gradle.read_text()
+if 'useLegacyPackaging' not in text:
+    text = text.replace('android {', 'android {\n    packaging {\n        jniLibs { useLegacyPackaging = true }\n    }', 1)
+else:
+    text = text.replace('useLegacyPackaging = false', 'useLegacyPackaging = true')
+gradle.write_text(text)
