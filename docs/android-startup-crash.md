@@ -14,7 +14,7 @@
 
 0.4.1 使用 AGP packaging.jniLibs.useLegacyPackaging=true，安装时将原生库解压成独立文件，隔离从 base.apk 直接 mmap 原生库的加载路径。保留官方 Flutter 3.47.5 引擎与原生库指令；保留原有渲染设置。这是一项兼容性诊断改动，实际设备上的 SIGILL 修复仍需验证。
 
-CI 在静态分析、单元/界面测试和三 ABI release 构建后，增加 Android 17 API 37 x86_64 模拟器三次冷启动存活检查，并保留 logcat 和截图。此检查覆盖普通 Android 启动，ARM64 Evolution X + Root 注入环境需手机实测。
+CI 在静态分析、单元/界面测试和三 ABI release 构建后，增加 Android 16 API 36 x86_64 模拟器三次冷启动存活检查，并保留 logcat 和截图。CI 的 SDK 仓库未提供 platforms;android-37，因而采用可用的 Android 16 镜像。此检查覆盖普通 Android 启动，ARM64 Evolution X + Root 注入环境需手机实测。
 
 设备验证：
 

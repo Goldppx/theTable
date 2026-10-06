@@ -52,11 +52,11 @@ jobs:
       - name: Enable Android emulator acceleration
         if: github.event_name == 'push'
         run: sudo chmod 666 /dev/kvm
-      - name: Android 17 cold-start smoke test
+      - name: Android 16 cold-start smoke test
         if: github.event_name == 'push'
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 37
+          api-level: 36
           arch: x86_64
           target: google_apis
           disable-animations: true
