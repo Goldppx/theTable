@@ -21,10 +21,12 @@ class NotificationPlan {
         final time = DateTime(day.year, day.month, day.day, prefs.morningHour, prefs.morningMinute);
         if (time.isAfter(now)) output.add(PlannedNotification(time, '今日早报 · 第 $week 周', today.isEmpty ? '今天没有课程，安排好自己的时间。' : today.map((c) => '${periodTimes[c.startPeriod - 1][0]} ${c.name} · ${c.room}').join('\n'), 'morning'));
       }
-      if (prefs.nextClass) for (final c in today) {
+      if (prefs.nextClass) {
+        for (final c in today) {
         final clock = periodTimes[c.startPeriod - 1][0].split(':').map(int.parse).toList();
         final time = DateTime(day.year, day.month, day.day, clock[0], clock[1]).subtract(Duration(minutes: prefs.leadMinutes));
         if (time.isAfter(now)) output.add(PlannedNotification(time, '${c.name}即将开始', '${prefs.leadMinutes} 分钟后 · ${c.period} · ${c.room}', 'course'));
+        }
       }
     }
     output.sort((a, b) => a.time.compareTo(b.time));

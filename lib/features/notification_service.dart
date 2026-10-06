@@ -21,7 +21,7 @@ class NotificationService with WidgetsBindingObserver {
     if (_ready) return;
     tzdata.initializeTimeZones();
     final zone = await PlatformTools.channel.invokeMethod<String>('timezone') ?? 'Asia/Shanghai';
-    tz.setLocalLocation(tz.getLocation(zone));
+    try { tz.setLocalLocation(tz.getLocation(zone)); } catch (_) { tz.setLocalLocation(tz.UTC); }
     await plugin.initialize(const InitializationSettings(android: AndroidInitializationSettings('@drawable/notification_icon')));
     WidgetsBinding.instance.addObserver(this);
     _ready = true;

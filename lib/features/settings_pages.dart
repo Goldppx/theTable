@@ -39,7 +39,7 @@ class ShortcutsPage extends StatelessWidget {
     body: ListenableBuilder(listenable: state, builder: (context, _) => ListView(padding: const EdgeInsets.all(16), children: [
       const Text('点击入口打开；编辑可修改包名或小程序链接。'), const SizedBox(height: 12),
       ...state.shortcuts.asMap().entries.map((entry) => Card(child: ListTile(title: Text(entry.value.name), subtitle: Text(entry.value.target, maxLines: 2, overflow: TextOverflow.ellipsis), onTap: () => launchShortcut(context, entry.value),
-        trailing: Row(mainAxisSize: MainAxisSize.min, children: [IconButton(tooltip: '编辑', onPressed: () => edit(context, entry.key), icon: const Icon(Icons.edit_outlined)), IconButton(tooltip: '删除', onPressed: () => state.saveFeatures(entries: List.of(state.shortcuts)..removeAt(entry.key)), icon: const Icon(Icons.delete_outline))]))),
+        trailing: Row(mainAxisSize: MainAxisSize.min, children: [IconButton(tooltip: '编辑', onPressed: () => edit(context, entry.key), icon: const Icon(Icons.edit_outlined)), IconButton(tooltip: '删除', onPressed: () => state.saveFeatures(entries: List.of(state.shortcuts)..removeAt(entry.key)), icon: const Icon(Icons.delete_outline))])))),
       TextButton(onPressed: () => state.saveFeatures(entries: List.of(Shortcut.defaults)), child: const Text('恢复默认入口')), const SizedBox(height: 80),
     ])));
 }
