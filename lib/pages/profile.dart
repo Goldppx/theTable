@@ -3,6 +3,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import '../auth/campus_auth.dart';
 import '../auth/login_page.dart';
 import '../services/app_state.dart';
+import '../features/settings_pages.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({required this.state, super.key});
@@ -44,7 +45,7 @@ class ProfilePage extends StatelessWidget {
               firstDate: DateTime(2020), lastDate: DateTime(2040));
             if (value != null) await state.setSemester(value.subtract(Duration(days: value.weekday - 1)));
           }),
-        const ListTile(title: Text('本地数据'), subtitle: Text('课程缓存按学号存储；账号密码由学校登录网页处理。地图标记保存在本机。')),
+        const ListTile(title: Text('本地数据'), subtitle: Text('课程缓存按学号存储；密码仅用于本次校园认证。地图标记保存在本机。')),
       ]))));
   @override
   Widget build(BuildContext context) {
@@ -74,9 +75,11 @@ class ProfilePage extends StatelessWidget {
             Expanded(child: Text(p == null ? '添加账号' : '重新认证')), const Icon(Icons.chevron_right)])),
       ]))), const SizedBox(height: 18),
       _tile(context, Icons.settings_outlined, '设置', () => settings(context)), const SizedBox(height: 10),
+      _tile(context, Icons.notifications_outlined, '通知', () => Navigator.push(context, MaterialPageRoute<void>(builder: (_) => NotificationSettingsPage(state: state)))), const SizedBox(height: 10),
+      _tile(context, Icons.apps, '校园快捷方式', () => Navigator.push(context, MaterialPageRoute<void>(builder: (_) => ShortcutsPage(state: state)))), const SizedBox(height: 10),
       _tile(context, Icons.palette_outlined, '外观', () => appearance(context)), const SizedBox(height: 10),
-      _tile(context, Icons.info_outline, '关于', () => showAboutDialog(context: context, applicationName: '应大通', applicationVersion: '0.2.0',
-        children: const [Text('Flutter / Material 3\n地图：© OpenStreetMap contributors · Esri\n真实课程网页解析待账号验证。')])),
+      _tile(context, Icons.info_outline, '关于', () => showAboutDialog(context: context, applicationName: '应大通', applicationVersion: '0.4.0',
+        children: const [Text('Flutter / Material 3\n地图：高德官方 URI API\n真实课程网页解析待账号验证。')])),
     ]);
   }
   String _value(String? value) => value == null || value.isEmpty ? '待学校门户提供' : value;

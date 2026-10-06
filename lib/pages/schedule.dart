@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import '../auth/jwxt_page.dart';
 import '../models/course.dart';
+import '../models/period_times.dart';
 import '../services/app_state.dart';
 
-const periodTimes = [
-  ['08:00', '08:45'], ['08:55', '09:40'], ['10:10', '10:55'], ['11:05', '11:50'],
-  ['14:30', '15:15'], ['15:25', '16:10'], ['16:40', '17:25'], ['17:35', '18:20'],
-  ['19:20', '20:05'], ['20:15', '21:00'],
-];
 class SchedulePage extends StatefulWidget {
   const SchedulePage({required this.state, super.key});
   final CampusState state;

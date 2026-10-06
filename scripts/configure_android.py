@@ -82,3 +82,27 @@ class MainActivity : FlutterActivity() {
     }
 }
 ''', encoding='utf-8')
+
+activity.write_text(activity.read_text().replace('super.configureFlutterEngine(flutterEngine)', 'super.configureFlutterEngine(flutterEngine)\n        CampusTools.register(this, flutterEngine)'))
+(activity.parent / 'CampusTools.kt').write_text(Path('android_support/CampusTools.kt').read_text().replace('__PACKAGE__', package_line.removeprefix('package ').strip()))
+for permission in ('POST_NOTIFICATIONS', 'SCHEDULE_EXACT_ALARM', 'RECEIVE_BOOT_COMPLETED'):
+    ET.SubElement(root, 'uses-permission', {attr + 'name': 'android.permission.' + permission})
+queries = ET.SubElement(root, 'queries')
+intent = ET.SubElement(queries, 'intent')
+ET.SubElement(intent, 'action', {attr + 'name': 'android.intent.action.MAIN'})
+ET.SubElement(intent, 'category', {attr + 'name': 'android.intent.category.LAUNCHER'})
+for scheme in ('https', 'weixin', 'androidamap', 'baidumap', 'geo'):
+    intent = ET.SubElement(queries, 'intent')
+    ET.SubElement(intent, 'action', {attr + 'name': 'android.intent.action.VIEW'})
+    ET.SubElement(intent, 'data', {attr + 'scheme': scheme})
+ET.SubElement(app, 'receiver', {attr + 'name': 'com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver', attr + 'exported': 'false'})
+receiver = ET.SubElement(app, 'receiver', {attr + 'name': 'com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver', attr + 'exported': 'false'})
+intent = ET.SubElement(receiver, 'intent-filter')
+for action in ('BOOT_COMPLETED', 'MY_PACKAGE_REPLACED', 'QUICKBOOT_POWERON'):
+    ET.SubElement(intent, 'action', {attr + 'name': 'android.intent.action.' + action})
+tree.write(path, encoding='utf-8', xml_declaration=True)
+(icon.parent / 'notification_icon.xml').write_text('''<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24"><path android:fillColor="#FFFFFFFF" android:pathData="M4,4h16v17h-16z M7,1h2v6h-2z M15,1h2v6h-2z" /></vector>''')
+gradle = Path('android/app/build.gradle.kts')
+text = gradle.read_text().replace('compileOptions {', 'compileOptions {\n        isCoreLibraryDesugaringEnabled = true')
+text += '\ndependencies {\n    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")\n    implementation("androidx.work:work-runtime-ktx:2.10.1")\n}\n'
+gradle.write_text(text)
