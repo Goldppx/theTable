@@ -90,5 +90,5 @@ class NotificationService with WidgetsBindingObserver {
   }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) { _active = state == AppLifecycleState.resumed; _restartForeground(); }
-  void dispose() { WidgetsBinding.instance.removeObserver(this); _generation++; _stream?.close(force: true); _timer?.cancel(); }
+  void dispose() { if (_ready) WidgetsBinding.instance.removeObserver(this); _generation++; _stream?.close(force: true); _timer?.cancel(); }
 }
