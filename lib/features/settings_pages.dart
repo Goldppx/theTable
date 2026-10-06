@@ -80,7 +80,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       FilledButton(onPressed: busy ? null : () => update({'apiUrl': url.text.trim(), 'token': token.text.trim()}), child: const Text('保存 API 配置')),
       SwitchListTile(title: const Text('接收 API 通知'), value: p.api, onChanged: busy ? null : (v) => update({'api': v, 'apiUrl': url.text.trim(), 'token': token.text.trim()}, permission: v)),
       const Text('前台：SSE 实时接收或每 30 秒检查。后台：系统定期检查，最短 15 分钟，可能延迟；强制停止后需重新打开。服务端返回消息 id、title、body，可选 HTTPS url。接口格式见仓库 docs/notifications.md。'),
-      const SizedBox(height: 18), OutlinedButton(onPressed: busy ? null : () async { try { await widget.state.notificationService.checkNow(); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API 检查完成'))); } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e'))); } }, child: const Text('立即检查 API')),
+      const SizedBox(height: 18), OutlinedButton(onPressed: busy || !p.api ? null : () async { try { await widget.state.notificationService.checkNow(); if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('API 检查完成'))); } catch (e) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e'))); } }, child: const Text('立即检查 API')),
       OutlinedButton(onPressed: () async { await widget.state.notificationService.exactPermission(); await widget.state.reschedule(); }, child: const Text('允许准时课前提醒')),
       const Text('未授予精确闹钟权限时，系统可能延迟课前提醒。'),
       TextButton(onPressed: () async { if (await widget.state.notificationService.permission()) await widget.state.notificationService.test(); }, child: const Text('发送测试通知')),

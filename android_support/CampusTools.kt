@@ -86,7 +86,7 @@ object CampusTools {
                         } else manager.cancelUniqueWork("campus_api")
                         result.success(null)
                     }
-                    "apiMessage" -> { message(activity, JSONObject(args)); result.success(null) }
+                    "apiMessage" -> { if (config(activity).optBoolean("enabled")) message(activity, JSONObject(args)); result.success(null) }
                     "apiCheck" -> executor.execute {
                         try { check(activity); activity.runOnUiThread { result.success(null) } }
                         catch (_: Exception) { activity.runOnUiThread { result.error("API_UNAVAILABLE", "API 检查失败，请检查地址、令牌和 JSON 响应", null) } }
@@ -125,6 +125,8 @@ object CampusTools {
             val json = org.json.JSONTokener(String(bytes, Charsets.UTF_8)).nextValue()
             val items = when (json) { is JSONArray -> json; is JSONObject -> if (json.has("messages")) json.getJSONArray("messages") else JSONArray().put(json); else -> throw IllegalArgumentException() }
             require(items.length() <= 200)
+            val current = config(c)
+            if (!current.optBoolean("enabled") || current.optString("url") != url) return
             for (i in 0 until items.length()) message(c, items.getJSONObject(i))
         } finally { connection.disconnect() }
     }
