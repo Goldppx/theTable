@@ -44,9 +44,9 @@ jobs:
         run: |
           flutter build apk --release --split-per-abi
           mkdir -p dist
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk dist/theTable-0.4.1-arm64-v8a.apk
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk dist/theTable-0.4.1-armeabi-v7a.apk
-          cp build/app/outputs/flutter-apk/app-x86_64-release.apk dist/theTable-0.4.1-x86_64.apk
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk dist/theTable-0.4.2-arm64-v8a.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk dist/theTable-0.4.2-armeabi-v7a.apk
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk dist/theTable-0.4.2-x86_64.apk
           cd dist
           sha256sum *.apk > SHA256SUMS
       - name: Enable Android emulator acceleration
@@ -74,7 +74,7 @@ jobs:
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: theTable-0.4.1-apks
+          name: theTable-0.4.2-apks
           path: dist/
           retention-days: 30
       - name: Upload UI previews
@@ -89,10 +89,11 @@ jobs:
         with:
           tag_name: preview-${{ github.sha }}
           target_commitish: ${{ github.sha }}
-          name: 'theTable 0.4.1 · Preview'
+          name: 'theTable 0.4.2 · Preview'
           prerelease: true
           body: |
-            Native-library extraction compatibility build for startup crash investigation.
+            Fix expired/deleted cookie replay in WebView session restoration, retry and reauthentication.
+            Preserve native-library extraction compatibility and WorkManager startup fixes.
             Official Flutter engine retained; requires device validation with injection excluded.
             Default blue palette, course/morning/API notifications, configurable app and mini-program URL shortcuts,
             AMap official URI campus map and native map application launch.

@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'campus_http.dart';
 
 /// Android native CookieManager preserves Secure/HttpOnly/Path attributes.
@@ -10,10 +8,11 @@ class CampusSessionBridge {
     final client = CampusHttp();
     try {
       final kind = await client.restore();
-      final raw = await const FlutterSecureStorage().read(key: CampusHttp.sessionKey);
-      if (raw == null) return null;
-      final data = jsonDecode(raw) as Map;
-      await _channel.invokeMethod<void>('setCookies', data['cookies']);
+      if (kind == null || client.webViewCookies.isEmpty) {
+        throw const FormatException('校园会话已过期，请重新认证');
+      }
+      await _channel.invokeMethod<void>('setCookies', client.webViewCookies)
+          .timeout(const Duration(seconds: 20));
       return kind;
     } finally { client.close(); }
   }

@@ -1,4 +1,4 @@
-# 应大通 / theTable · 0.4.1
+# 应大通 / theTable · 0.4.2
 
 Flutter / Material 3 校园客户端，按参考截图调整首页、地图、周课表与个人中心。
 
@@ -12,7 +12,7 @@ Flutter / Material 3 校园客户端，按参考截图调整首页、地图、�
 
 ## APK 下载
 
-PR 分支推送后，GitHub Actions 执行分析、测试和分 ABI 构建，并发布带完整提交 SHA 的 Preview Release。现代 Android 手机使用 `theTable-0.4.1-arm64-v8a.apk`；32 位设备选 armeabi-v7a；模拟器选 x86_64。Release 附 SHA256SUMS。
+PR 分支推送后，GitHub Actions 执行分析、测试和分 ABI 构建，并发布带完整提交 SHA 的 Preview Release。现代 Android 手机使用 `theTable-0.4.2-arm64-v8a.apk`；32 位设备选 armeabi-v7a；模拟器选 x86_64。Release 附 SHA256SUMS。
 
 预览包使用 Flutter 生成工程的开发签名配置。正式发布应配置固定发布密钥。旧安装包签名不同的设备需卸载旧版后安装；卸载会移除本机缓存。
 

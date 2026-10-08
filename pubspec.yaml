@@ -1,7 +1,7 @@
 name: the_table
 description: A clean-room Flutter campus companion.
 publish_to: none
-version: 0.4.1+7
+version: 0.4.2+8
 
 environment:
   sdk: ^3.6.0

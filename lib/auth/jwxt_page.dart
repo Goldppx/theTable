@@ -1,12 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../services/schedule_parser.dart';
 import 'campus_auth.dart';
 import 'session_bridge.dart';
+import 'login_page.dart';
 
 class OfficialJwxtPage extends StatefulWidget {
-  const OfficialJwxtPage({super.key});
+  const OfficialJwxtPage({this.onAuthenticated, super.key});
+  final Future<void> Function(CampusProfile)? onAuthenticated;
   @override
   State<OfficialJwxtPage> createState() => _OfficialJwxtPageState();
 }
@@ -14,29 +18,69 @@ class _OfficialJwxtPageState extends State<OfficialJwxtPage> {
   late final WebViewController controller;
   bool loading = true, reading = false;
   String? error;
+  bool pageReady = false, openingSession = false;
   @override
   void initState() {
     super.initState();
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(NavigationDelegate(onPageStarted: (_) {
-        if (mounted) setState(() { loading = true; error = null; });
-      }, onPageFinished: (_) { if (mounted) setState(() => loading = false); },
-        onWebResourceError: (e) { if (mounted && e.isForMainFrame == true) setState(() { loading = false; error = e.description; }); }))
+        if (mounted) setState(() { loading = true; pageReady = false; error = null; });
+      }, onPageFinished: (url) {
+        if (!mounted) return;
+        final host = Uri.tryParse(url)?.host;
+        setState(() {
+          loading = false;
+          pageReady = host == 'jw.cidp.edu.cn' || host == 'gms.ncist.edu.cn';
+          if (host == 'auth.ncist.edu.cn') error = '学校会话已过期，请重新认证';
+        });
+      },
+        onWebResourceError: (e) { if (mounted && e.isForMainFrame == true) setState(() { loading = false; pageReady = false; error = e.description; }); }))
 ;
     _openSession();
   }
   Future<void> _openSession() async {
+    if (openingSession) return;
+    setState(() { openingSession = true; loading = true; pageReady = false; error = null; });
     try {
       final kind = await CampusSessionBridge.restoreToWebView();
       if (!mounted) return;
       final uri = kind == 'graduate' ? Uri.parse('https://gms.ncist.edu.cn/grzxgl/') : Uri.parse('https://jw.cidp.edu.cn/LoginHandler.ashx');
       await controller.loadRequest(uri, headers: {'Referer': '${CampusAuthService.portalOrigin}/'});
+    } on FormatException catch (e) {
+      _sessionError(e.message.toString());
+    } on PlatformException catch (e) {
+      _sessionError(e.code == 'COOKIE_REJECTED'
+          ? '学校网页会话写入失败，请重新认证'
+          : '登录会话恢复失败（${e.code}），请重新认证');
+    } on TimeoutException {
+      _sessionError('恢复学校网页会话超时，请重试');
     } catch (_) {
-      if (mounted) setState(() { loading = false; error = '登录会话恢复失败，请重新登录'; });
+      _sessionError('登录会话读取失败，请重新认证');
+    } finally {
+      if (mounted) setState(() => openingSession = false);
     }
   }
+  void _sessionError(String message) {
+    if (mounted) setState(() { loading = false; pageReady = false; error = message; });
+  }
+  Future<void> _retry() async {
+    if (openingSession) return;
+    if (error != null || !pageReady) {
+      await _openSession();
+    } else {
+      await controller.reload();
+    }
+  }
+  Future<void> _reauthenticate() async {
+    final profile = await Navigator.of(context).push<CampusProfile>(MaterialPageRoute(
+      builder: (_) => CampusLoginPage(auth: CampusAuthService())));
+    if (!mounted || profile == null) return;
+    if (widget.onAuthenticated != null) await widget.onAuthenticated!(profile);
+    if (mounted) await _openSession();
+  }
   Future<void> read() async {
+    if (!pageReady || loading || error != null || openingSession || reading) return;
     setState(() => reading = true);
     try {
       final url = Uri.tryParse(await controller.currentUrl() ?? '');
@@ -66,14 +110,17 @@ class _OfficialJwxtPageState extends State<OfficialJwxtPage> {
   }
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('教务课表同步'), actions: [IconButton(tooltip: '刷新网页', onPressed: controller.reload, icon: const Icon(Icons.refresh))]),
+    appBar: AppBar(title: const Text('教务课表同步'), actions: [IconButton(tooltip: '刷新网页', onPressed: openingSession ? null : _retry, icon: const Icon(Icons.refresh))]),
     body: Column(children: [
       Padding(padding: const EdgeInsets.all(12), child: Row(children: [
         const Expanded(child: Text('在教务系统进入个人课表，再读取当前页面。', style: TextStyle(fontSize: 12))), const SizedBox(width: 8),
-        FilledButton(onPressed: reading || loading ? null : read, child: Text(reading ? '读取中…' : '读取课表')),
+        FilledButton(onPressed: reading || loading || openingSession || !pageReady || error != null ? null : read, child: Text(reading ? '读取中…' : '读取课表')),
       ])),
       if (loading) const LinearProgressIndicator(),
-      if (error != null) MaterialBanner(content: Text('网页加载失败：$error'), actions: [TextButton(onPressed: controller.reload, child: const Text('重试'))]),
+      if (error != null) MaterialBanner(content: Text('网页加载失败：$error'), actions: [
+        TextButton(onPressed: openingSession ? null : _retry, child: const Text('重试')),
+        TextButton(onPressed: openingSession ? null : _reauthenticate, child: const Text('重新认证')),
+      ]),
       Expanded(child: WebViewWidget(controller: controller)),
     ]));
 }

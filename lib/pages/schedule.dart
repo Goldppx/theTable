@@ -16,7 +16,7 @@ class _SchedulePageState extends State<SchedulePage> {
   @override
   void initState() { super.initState(); week = widget.state.currentWeek; }
   Future<void> sync() async {
-    final imported = await Navigator.of(context).push<String>(MaterialPageRoute(builder: (_) => const OfficialJwxtPage()));
+    final imported = await Navigator.of(context).push<String>(MaterialPageRoute(builder: (_) => OfficialJwxtPage(onAuthenticated: widget.state.setProfile)));
     if (imported != null) {
       try { await widget.state.importSchedule(imported); }
       catch (e) { if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('导入失败：$e'))); }

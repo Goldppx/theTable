@@ -77,12 +77,17 @@ class CampusHttp implements CampusTransport {
     for (final item in root['cookies'] as List) {
       final uri = trusted(Uri.parse(item['uri'] as String));
       final cookie = Cookie.fromSetCookieValue(item['cookie'] as String);
-      if (cookie.expires != null && cookie.expires!.isBefore(DateTime.now())) continue;
+      if (cookie.maxAge != null && cookie.maxAge! <= 0) continue;
+      if (cookie.expires != null && !cookie.expires!.isAfter(DateTime.now())) continue;
       await _jar.saveFromResponse(uri, [cookie]);
       _records['${cookie.domain ?? uri.host}|${cookie.path ?? '/'}|${cookie.name}'] = {'uri': uri.toString(), 'cookie': cookie.toString()};
     }
     return root['studentKind'] as String?;
   }
+  /// Export only records restored as live cookies, never saved deletion headers.
+  List<Map<String, String>> get webViewCookies =>
+      _records.values.map((record) => Map<String, String>.from(record)).toList();
+
   static Future<void> clearSession() => const FlutterSecureStorage().delete(key: sessionKey);
   void close() => _client.close(force: true);
 }
