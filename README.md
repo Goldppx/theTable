@@ -1,9 +1,9 @@
-# 应大通 / theTable · 0.4.2
+# 应大通 / theTable · 0.4.3
 
 Flutter / Material 3 校园客户端，按参考截图调整首页、地图、周课表与个人中心。
 
-- 深色卡片、四栏底部导航；默认蓝色配色；浅色 / 深色 / 跟随系统及可选 Android 12+ 动态取色。
-- 7 天 × 10 节的周课表，周次筛选、课程详情、冲突课程并排显示、字体放大与窄屏滚动。
+- 深色卡片、四栏底部导航与宽屏侧边导航；默认蓝色配色；浅色 / 深色 / 跟随系统及可选 Android 12+ 动态取色。
+- 7 天 × 10 节的周课表，周次筛选、课程详情、冲突课程并排显示、窄屏与大字体课程列表。
 - 本地课程 JSON 导入、按学号缓存。空课表显示导入引导；生产界面不会填入演示课程。
 - 高德官方 URI 校园地图、实际定位、添加与删除标签、高德/百度/系统地图软件跳转。
 - 课前提前通知、每日早报、HTTPS API 消息独立开关；前台 SSE 与后台 JSON 定期检查。
@@ -12,7 +12,7 @@ Flutter / Material 3 校园客户端，按参考截图调整首页、地图、�
 
 ## APK 下载
 
-PR 分支推送后，GitHub Actions 执行分析、测试和分 ABI 构建，并发布带完整提交 SHA 的 Preview Release。现代 Android 手机使用 `theTable-0.4.2-arm64-v8a.apk`；32 位设备选 armeabi-v7a；模拟器选 x86_64。Release 附 SHA256SUMS。
+PR 分支推送后，GitHub Actions 执行分析、测试和分 ABI 构建，并发布带完整提交 SHA 的 Preview Release。现代 Android 手机使用 `theTable-0.4.3-arm64-v8a.apk`；32 位设备选 armeabi-v7a；模拟器选 x86_64。Release 附 SHA256SUMS。
 
 预览包使用 Flutter 生成工程的开发签名配置。正式发布应配置固定发布密钥。旧安装包签名不同的设备需卸载旧版后安装；卸载会移除本机缓存。
 
