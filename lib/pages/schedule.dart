@@ -143,102 +143,79 @@ class _SchedulePageState extends State<SchedulePage> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 12, 12),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Column(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  Text(
-                    '${monday.month}月${monday.day}日–${sunday.month == monday.month ? '' : '${sunday.month}月'}${sunday.day}日',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                  Expanded(
+                    child: Text(
+                      '${monday.month}月${monday.day}日–${sunday.month == monday.month ? '' : '${sunday.month}月'}${sunday.day}日',
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
-                  Text(
-                    '${monday.year} 年',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colors.onSurfaceVariant,
-                    ),
+                  PopupMenuButton<String>(
+                    tooltip: '课表设置',
+                    onSelected: (value) {
+                      if (value == 'import') import();
+                      if (value == 'view') setState(() => listMode = !listMode);
+                      if (value == 'size') setState(() => compact = !compact);
+                      if (value == 'today') {
+                        setState(() => week = state.currentWeek);
+                      }
+                    },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: 'view',
+                        child: Text(listMode ? '周课表视图' : '课程列表视图'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'import',
+                        child: Text('导入课表 JSON'),
+                      ),
+                      const PopupMenuItem(value: 'today', child: Text('回到本周')),
+                      PopupMenuItem(
+                        value: 'size',
+                        child: Text(compact ? '展开节次高度' : '紧凑节次高度'),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              TextButton.icon(
-                onPressed: rooms,
-                icon: const Icon(Icons.apartment, size: 18),
-                label: const Text('教室'),
-              ),
-              DropdownButton<int>(
-                value: week.clamp(1, state.totalWeeks),
-                underline: const SizedBox.shrink(),
-                items: List.generate(
-                  state.totalWeeks,
-                  (i) => DropdownMenuItem(
-                    value: i + 1,
-                    child: Text('第 ${i + 1} 周'),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButton<int>(
+                      isExpanded: true,
+                      value: week,
+                      underline: const SizedBox.shrink(),
+                      items: List.generate(
+                        state.totalWeeks,
+                        (i) => DropdownMenuItem(
+                          value: i + 1,
+                          child: Text('第 ${i + 1} 周'),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        if (value != null) setState(() => week = value);
+                      },
+                    ),
                   ),
-                ),
-                onChanged: (value) {
-                  if (value != null) setState(() => week = value);
-                },
-              ),
-              IconButton(
-                tooltip: '刷新：打开教务系统读取课表',
-                onPressed: sync,
-                icon: const Icon(Icons.refresh),
-              ),
-              PopupMenuButton<String>(
-                tooltip: '课表设置',
-                onSelected: (value) {
-                  if (value == 'import') import();
-                  if (value == 'view') setState(() => listMode = !listMode);
-                  if (value == 'size') setState(() => compact = !compact);
-                  if (value == 'today') {
-                    setState(() => week = state.currentWeek);
-                  }
-                },
-                itemBuilder: (_) => [
-                  PopupMenuItem(
-                    value: 'view',
-                    child: Text(listMode ? '周课表视图' : '课程列表视图'),
+                  IconButton(
+                    tooltip: '本周教室',
+                    onPressed: rooms,
+                    icon: const Icon(Icons.meeting_room_outlined),
                   ),
-                  const PopupMenuItem(
-                    value: 'import',
-                    child: Text('导入课表 JSON'),
-                  ),
-                  const PopupMenuItem(value: 'today', child: Text('回到本周')),
-                  PopupMenuItem(
-                    value: 'size',
-                    child: Text(compact ? '展开节次高度' : '紧凑节次高度'),
+                  IconButton(
+                    tooltip: '刷新：打开教务系统读取课表',
+                    onPressed: sync,
+                    icon: const Icon(Icons.sync),
                   ),
                 ],
               ),
             ],
           ),
         ),
-        if (state.courses.isEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    '课表等待导入，点击刷新或导入 JSON',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                TextButton(onPressed: import, child: const Text('导入')),
-              ],
-            ),
-          ),
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -427,13 +404,7 @@ class _SchedulePageState extends State<SchedulePage> {
                                 ),
                                 ...visible.asMap().entries.map((entry) {
                                   final course = entry.value;
-                                  final foreground =
-                                      ThemeData.estimateBrightnessForColor(
-                                            course.color,
-                                          ) ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.black;
+                                  final foreground = colors.onSurface;
                                   final slot = lanes[entry.key].lane;
                                   final cellWidth =
                                       dayWidth / lanes[entry.key].lanes;
@@ -454,8 +425,11 @@ class _SchedulePageState extends State<SchedulePage> {
                                             rowHeight -
                                         4,
                                     child: Material(
-                                      color: course.color,
-                                      borderRadius: BorderRadius.circular(14),
+                                      color: Color.alphaBlend(
+                                        course.color.withValues(alpha: .24),
+                                        colors.surface,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
                                       clipBehavior: Clip.antiAlias,
                                       child: InkWell(
                                         onTap: () => detail(course),
@@ -479,7 +453,9 @@ class _SchedulePageState extends State<SchedulePage> {
                                               const SizedBox(height: 3),
                                               Expanded(
                                                 child: Text(
-                                                  '${course.teacher}\n${course.room}\n${course.weekLabel}',
+                                                  compact
+                                                      ? course.room
+                                                      : '${course.teacher}\n${course.room}\n${course.weekLabel}',
                                                   overflow: TextOverflow.fade,
                                                   style: TextStyle(
                                                     color: foreground,
