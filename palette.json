@@ -1,0 +1,115 @@
+{
+  "source_sha256": "2161ad66aa5c21d31c6fa1dc928e87c64009325ed63b2f7d4ea9de4afa43bff6",
+  "bundle_sha256": "99653831f9453030e9467ffb04aa93c01a04bb117c6748f1e8db61cf6047e222",
+  "hermes_version": 98,
+  "colors": [
+    {
+      "original": "#171C22",
+      "resource": "system_neutral1_900",
+      "offset": 505236,
+      "string_id": 1925
+    },
+    {
+      "original": "#F8F9FC",
+      "resource": "system_neutral1_10",
+      "offset": 409904,
+      "string_id": 545
+    },
+    {
+      "original": "#EEF1F5",
+      "resource": "system_neutral1_50",
+      "offset": 514362,
+      "string_id": 2210
+    },
+    {
+      "original": "#E0E7F1",
+      "resource": "system_accent1_100",
+      "offset": 514215,
+      "string_id": 2198
+    },
+    {
+      "original": "#626A73",
+      "resource": "system_neutral2_600",
+      "offset": 510984,
+      "string_id": 2054
+    },
+    {
+      "original": "#145FA8",
+      "resource": "system_accent1_600",
+      "offset": 436706,
+      "string_id": 824
+    },
+    {
+      "original": "#D4E7FF",
+      "resource": "system_accent1_100",
+      "offset": 514108,
+      "string_id": 2189
+    },
+    {
+      "original": "#C4C7CC",
+      "resource": "system_neutral2_300",
+      "offset": 514073,
+      "string_id": 2184
+    },
+    {
+      "original": "#E2E6EB",
+      "resource": "system_neutral1_100",
+      "offset": 514222,
+      "string_id": 2199
+    },
+    {
+      "original": "#101418",
+      "resource": "system_neutral1_1000",
+      "offset": 505063,
+      "string_id": 1915
+    },
+    {
+      "original": "#181C20",
+      "resource": "system_neutral1_900",
+      "offset": 505283,
+      "string_id": 1926
+    },
+    {
+      "original": "#20252B",
+      "resource": "system_neutral1_800",
+      "offset": 507165,
+      "string_id": 1945
+    },
+    {
+      "original": "#2B333C",
+      "resource": "system_accent1_800",
+      "offset": 509246,
+      "string_id": 1973
+    },
+    {
+      "original": "#AEB7C1",
+      "resource": "system_neutral2_300",
+      "offset": 513773,
+      "string_id": 2173
+    },
+    {
+      "original": "#A4C9FF",
+      "resource": "system_accent1_200",
+      "offset": 513747,
+      "string_id": 2170
+    },
+    {
+      "original": "#00315E",
+      "resource": "system_accent1_800",
+      "offset": 502196,
+      "string_id": 1861
+    },
+    {
+      "original": "#004881",
+      "resource": "system_accent1_700",
+      "offset": 502276,
+      "string_id": 1865
+    },
+    {
+      "original": "#444B53",
+      "resource": "system_neutral2_700",
+      "offset": 510331,
+      "string_id": 2025
+    }
+  ]
+}
