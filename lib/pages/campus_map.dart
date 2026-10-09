@@ -30,8 +30,9 @@ class _CampusMapPageState extends State<CampusMapPage> {
             if (mounted) setState(() => progress = value);
           },
           onWebResourceError: (e) {
-            if (e.isForMainFrame == true && mounted)
+            if (e.isForMainFrame == true && mounted) {
               setState(() => error = '地图加载失败，请检查网络后重试');
+            }
           },
           onNavigationRequest: (request) =>
               Uri.tryParse(request.url)?.scheme == 'https'
@@ -54,14 +55,17 @@ class _CampusMapPageState extends State<CampusMapPage> {
     if (locating) return;
     setState(() => locating = true);
     try {
-      if (!await Geolocator.isLocationServiceEnabled())
+      if (!await Geolocator.isLocationServiceEnabled()) {
         throw const FormatException('请开启系统定位');
+      }
       var p = await Geolocator.checkPermission();
-      if (p == LocationPermission.denied)
+      if (p == LocationPermission.denied) {
         p = await Geolocator.requestPermission();
+      }
       if (p == LocationPermission.denied ||
-          p == LocationPermission.deniedForever)
+          p == LocationPermission.deniedForever) {
         throw const FormatException('请允许定位权限');
+      }
       final point = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
@@ -74,9 +78,10 @@ class _CampusMapPageState extends State<CampusMapPage> {
       name = '当前位置';
       load();
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('$e')));
+      }
     } finally {
       if (mounted) setState(() => locating = false);
     }
@@ -154,8 +159,9 @@ class _CampusMapPageState extends State<CampusMapPage> {
         ),
       ),
     );
-    if (point != null)
+    if (point != null) {
       await widget.state.savePlaces([...widget.state.places, point]);
+    }
   }
 
   void external() => showModalBottomSheet<void>(
@@ -178,9 +184,10 @@ class _CampusMapPageState extends State<CampusMapPage> {
                 try {
                   await PlatformTools.openMap(lat, lon, name, entry.key);
                 } catch (e) {
-                  if (mounted)
+                  if (mounted) {
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text('打开失败：$e')));
+                  }
                 }
               },
             ),

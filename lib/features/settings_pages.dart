@@ -9,9 +9,10 @@ Future<void> launchShortcut(BuildContext context, Shortcut item) async {
   try {
     await PlatformTools.open(item);
   } catch (e) {
-    if (context.mounted)
+    if (context.mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('打开失败：$e')));
+    }
   }
 }
 
@@ -233,8 +234,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
     try {
       if (permission &&
           widget.state.persist &&
-          !await widget.state.notificationService.permission())
+          !await widget.state.notificationService.permission()) {
         throw const FormatException('请先在系统设置中允许通知');
+      }
       final next = NotificationPreferences.fromJson({
         ...widget.state.notifications.toJson(),
         ...changes,
@@ -244,14 +246,16 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
         if (uri == null ||
             uri.scheme != 'https' ||
             uri.host.isEmpty ||
-            uri.userInfo.isNotEmpty)
+            uri.userInfo.isNotEmpty) {
           throw const FormatException('API 地址须为 HTTPS，不包含账号密码');
+        }
       }
       await widget.state.saveFeatures(prefs: next);
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('$e')));
+      }
     } finally {
       if (mounted) setState(() => busy = false);
     }
@@ -311,11 +315,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                     minute: p.morningMinute,
                   ),
                 );
-                if (time != null)
+                if (time != null) {
                   await update({
                     'morningHour': time.hour,
                     'morningMinute': time.minute,
                   });
+                }
               },
             ),
             const Divider(),
@@ -370,14 +375,16 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   : () async {
                       try {
                         await widget.state.notificationService.checkNow();
-                        if (context.mounted)
+                        if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('API 检查完成')),
                           );
+                        }
                       } catch (e) {
-                        if (context.mounted)
+                        if (context.mounted) {
                           ScaffoldMessenger.of(context)
                               .showSnackBar(SnackBar(content: Text('$e')));
+                        }
                       }
                     },
               child: const Text('立即检查 API'),
@@ -392,8 +399,9 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             const Text('未授予精确闹钟权限时，系统可能延迟课前提醒。'),
             TextButton(
               onPressed: () async {
-                if (await widget.state.notificationService.permission())
+                if (await widget.state.notificationService.permission()) {
                   await widget.state.notificationService.test();
+                }
               },
               child: const Text('发送测试通知'),
             ),

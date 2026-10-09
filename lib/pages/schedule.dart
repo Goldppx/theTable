@@ -36,9 +36,10 @@ class _SchedulePageState extends State<SchedulePage> {
       try {
         await widget.state.importSchedule(imported);
       } catch (e) {
-        if (mounted)
+        if (mounted) {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text('导入失败：$e')));
+        }
       }
       if (mounted) setState(() => week = widget.state.currentWeek);
     }
@@ -54,9 +55,10 @@ class _SchedulePageState extends State<SchedulePage> {
       await widget.state.importSchedule(raw);
       if (mounted) setState(() => week = widget.state.currentWeek);
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('格式有误：$e')));
+      }
     }
   }
 
@@ -196,8 +198,9 @@ class _SchedulePageState extends State<SchedulePage> {
                   if (value == 'import') import();
                   if (value == 'view') setState(() => listMode = !listMode);
                   if (value == 'size') setState(() => compact = !compact);
-                  if (value == 'today')
+                  if (value == 'today') {
                     setState(() => week = state.currentWeek);
+                  }
                 },
                 itemBuilder: (_) => [
                   PopupMenuItem(
@@ -253,7 +256,8 @@ class _SchedulePageState extends State<SchedulePage> {
                   ),
                 );
               }
-              if (listMode ||
+              if (lanes.any((lane) => lane.lanes > 2) ||
+                  listMode ||
                   scale > 1.3 ||
                   constraints.maxWidth < 360 ||
                   constraints.maxHeight < 220) {

@@ -117,10 +117,11 @@ class ProfilePage extends StatelessWidget {
                   firstDate: DateTime(2020),
                   lastDate: DateTime(2040),
                 );
-                if (value != null)
+                if (value != null) {
                   await state.setSemester(
                     value.subtract(Duration(days: value.weekday - 1)),
                   );
+                }
               },
             ),
             const ListTile(
