@@ -21,6 +21,8 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - name: Install Android tools
         run: sdkmanager 'build-tools;35.0.0' 'platforms;android-35'
       - name: Build and verify original APK patch
